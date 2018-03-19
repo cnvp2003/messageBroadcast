@@ -1,0 +1,11 @@
+clean
+compile
+exit
+compile
+build
+compile
+exit
+compile
+testOnly *ChannelSpec*
+testOnly *FollowingSpec*
+exit
