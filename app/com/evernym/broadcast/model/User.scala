@@ -9,10 +9,14 @@ import com.evernym.broadcast.repository.Database
   */
 case class User(id: UUID = UUID.randomUUID(), name:String)
 
-object User {
+object Users {
 
     def insert(user:User):User = {
         Database.users += user
         user
+    }
+
+    def byId(userId: java.util.UUID): Option[User] ={
+        Database.users.filter(_.id == userId).headOption
     }
 }

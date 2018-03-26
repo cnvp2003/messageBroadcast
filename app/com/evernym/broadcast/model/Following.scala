@@ -9,8 +9,8 @@ import com.evernym.broadcast.repository.Database
   */
 class Following (channelId: UUID, UserId: UUID)
 
-object Following {
-    def createAndStore(user: User, channel: ChannelTypes) = {
+object Followings {
+    def createAndStore(user: User, channel: ChannelType) = {
         Database.followings += new Following(channel.id, user.id)
     }
 }

@@ -4,8 +4,8 @@
 
 
 
-GET     /subscribe                   @com.evernym.broadcast.controllers.BroadcastController.subscribe
-POST    /unsubscribe                 @com.evernym.broadcast.controllers.BroadcastController.unsubscribe
+GET     /subscribe                   @com.evernym.broadcast.controllers.BroadcastController.subscribe(userId: java.util.UUID, channelId: java.util.UUID)
+POST    /unsubscribe                 @com.evernym.broadcast.controllers.BroadcastController.unsubscribe(userId: java.util.UUID, channel: java.util.UUID)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                controllers.Assets.at(path="/public", file)

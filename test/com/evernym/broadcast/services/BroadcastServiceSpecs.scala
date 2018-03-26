@@ -1,13 +1,10 @@
 package com.evernym.broadcast.services
 
-
-
 import com.google.inject.Inject
-import org.specs2.matcher.Matchers
+import org.scalatest.{FlatSpec, Matchers}
 
-
-class BroadcastServiceSpecs @Inject() (broadcastService: BroadcastService) {
-  //extends FlatSpec with Matchers {
+class BroadcastServiceSpecs @Inject() (broadcastService: BroadcastService)
+  extends FlatSpec with Matchers {
 
 
 /*  "getStatistic" should "return correct Statistics" in {
