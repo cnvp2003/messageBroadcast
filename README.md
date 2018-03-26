@@ -1,72 +1,40 @@
 # Message Broadcast
-##Code Challenge
-We would like to have a restful API for our statistics. The main use case for our API is
-to calculate realtime statistic from the last 60 seconds. There will be two APIs, one of
-them is called every time a transaction is made. It is also the sole input of this rest
-API. The other one returns the statistic based of the transactions of the last 60
-seconds.
+##Background
+1.	Channels are a mechanism for broadcasting messages.
+2.	Messages can be sent a variety of ways, including via SMS.
+3.	People follow one or more channels, and receive messages when channels they follow broadcast a message.
+4.	Some followers have email, some have SMS, some have both.
+5.	Channels can have a phone number so that when SMS messages are sent from a channel, the user can see a phone number for that channel. The user can respond and we know to which channel they are responding because the phone number is associated with that channel.
+6.	Phone numbers cost money, and so they are a scarce resource. If they were free, every channel would be assigned a discrete phone number upon creation.
+7.	For this reason, more than one channel can use the same number. This is fine, as long as no two channels with the same phone number are followed by same person. If one person is following two channels that both use the same phone number, when that person sends and SMS message to that shared phone number, we won't know to which channel they are communicating. When one person is following two channels that both have the same phone number, this is called a "Collision".
+8.	Numbers are allocated on demand, that is, the first time that a broadcast for that channel needs to go via SMS.
+9.	If phone number X is being used for both Channel A and Channel B, and no followers of either follow the other, then we are fine. As soon as a follower of A starts to follow B, we must change the phone number of one of the channels.
+10.	When the phone number of a channel changes, we need to communicate to the channel users that the number has changed. It is very disruptive to change a number, and so we must minimize the number of users that are impacted. For this reason, we must take into consideration the number of recent SMS messages each channel has sent to determine which channel will be impacted the least by a change, and choose that channel to change the number.
 
-###Specs
-#####POST /transactions
-Every Time a new transaction happened, this endpoint will be called.
-Body:
-```
-{
-"amount": 12.3,
-"timestamp": 1478192204000
+##Data model
+`case class Channel(id: UUID, name: String, phoneNumber: Option[String])
+case class User(id: UUID, name: String)
+case class Following(channelId: UUID, UserId: UUID)
+case class PhoneNumber(number: String)`
+
+Don’t worry about persistence for now. Maybe just use a mutable List to store the collections of objects for now.
+
+`object DataStore {
+	import scala.collection.mutable.{List => MList}
+	val Channels: MList = _
+	val Users: MList = _
+	val Followings: MList = _
+	val PhoneNumbers: MList = _
 }
-```
-Where:
-* amount - transaction amount
-* timestamp - transaction time in epoch in millis in UTC time zone (this is not
-current timestamp)
-Returns: Empty body with either 201 or 204.
-* 201 - in case of success
-* 204 - if transaction is older than 60 seconds
-Where:
-* amount is a double specifying the amount
-* time is a long specifying unix time format in milliseconds
+`
+You can populate the data store with random data.
 
+If you find that this data model is insufficient, please augment as needed. Also, this model is missing broadcasts and broadcast statistics. If you need data that is not represented here, as in the case of broadcast statistics, create placeholder functions that returns random data for now.
 
-#####GET /statistics
-This is the main endpoint of this task, this endpoint have to execute in constant time
-and memory (O(1)). It returns the statistic based on the transactions which happened
-in the last 60 seconds.
-Returns:
-```
-{
-"sum": 1000,
-"avg": 100,
-"max": 200,
-"min": 50,
-"count": 10
-}
-```
-Where:
-* sum is a double specifying the total sum of transaction value in the last 60
-seconds
-* avg is a double specifying the average amount of transaction value in the last
-60 seconds
-* max is a double specifying single highest transaction value in the last 60
-seconds
-* min is a double specifying single lowest transaction value in the last 60
-seconds
-* count is a long specifying the total number of transactions happened in the last
-60 seconds
-Requirements
+##Objective
+1.	Build a mechanism in Scala that assigns to channels and changes phone numbers as needed.
+2.	Minimize the number of phone numbers allocated.
+3.	Do not allow collisions.
+4.	Minimize the impact of a channel phone number change.
+5.	Minimize the number of potential channel phone number changes by balancing the phone number allocations such that least used phone numbers are the first to be allocated when a new channel needs a number.
 
-For the rest api, the biggest and maybe hardest requirement is to make the GET
-/statistics execute in constant time and space. The best solution would be O(1). It is
-very recommended to tackle the O(1) requirement as the last thing to do as it is not
-the only thing which will be rated in the code challenge.
-Other requirements, which are obvious, but also listed here explicitly:
-* The API have to be threadsafe with concurrent requests
-* The API have to function properly, with proper result
-* The project should be buildable, and tests should also complete successfully.
-e.g. If maven is used, then mvn clean install should complete successfully.
-* The API should be able to deal with time discrepancy, which means, at any
-point of time, we could receive a transaction which have a timestamp of the
-past
-* Make sure to send the case in memory solution without database (including
-in-memory database)
-* Endpoints have to execute in constant time and memory (O(1))# messageBroadcast
